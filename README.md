@@ -1,6 +1,5 @@
 # Mini ISP: a virtual Italian service provider network
 
-[![CI](https://github.com/ahmed-touseef/mini-isp/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmed-touseef/mini-isp/actions/workflows/ci.yml)
 
 A service provider network built as code with [containerlab](https://containerlab.dev) and [FRRouting](https://frrouting.org), running on a Hetzner cloud server. Fifteen routers form a complete ISP: an IS-IS backbone with Segment Routing MPLS and BFD, iBGP with route reflectors, two transit providers, and peering at an internet exchange. The whole network is defined in text files, rebuilt with one command, and checked by automated test scripts.
 
@@ -122,6 +121,26 @@ Two lab findings were fixed along the way:
 ### Phase 5d: a real home over WireGuard
 The BNG terminates WireGuard on UDP 51820, published on the server's public address. A Windows PC at home becomes subscriber 100.64.1.2: behind CGNAT, across the MPLS core, out via Arelion or directly across the exchange, and resolving lab names on the anycast resolver. The tunnel is split, so only lab ranges use it. Keys live in `secrets/`, which is never committed; run `./phase5d-wireguard.sh` to generate your own before deploying.
 
+### Phase 6: automation with NetBox as the source of truth
+**NetBox 4.7** runs alongside the lab (netbox-docker, reachable only on localhost, generated secrets). The whole network was imported through its REST API by [`netbox/import_lab.py`](netbox/import_lab.py): 5 sites, 21 devices in 12 roles, 69 interfaces, 24 cables, 61 IP addresses, 13 prefixes and 7 ASNs. The import is idempotent.
+
+**Config generation.** [`netbox/render.py`](netbox/render.py) renders the configs of our 11 routers with a Jinja2 template. The underlay comes from NetBox: interfaces, addresses, descriptions taken from the cables, an `isis_metric` custom field, Segment Routing and BFD, with rules driven by the device role (overload bit on route reflectors and resolvers, no Segment Routing on resolvers). BGP and routing policy stay in versioned files in `configs/policy/`. Routers that belong to other companies are not generated. The template writes configuration the way FRR itself prints it, so a plan shows only real changes.
+
+**Proof.** The suite [`verify-all.sh`](verify-all.sh) passed 10 of 10 on the hand written configs, and again 10 of 10 after every router was rebuilt from generated configs.
+
+**Changes through NetBox.** [`deploy.sh`](deploy.sh) works in two modes: `plan` renders and shows exactly what would change on each running router, and `apply` pushes only those differences with `frr-reload`, without restarting anything. A maintenance drain of the Milan to Rome link was done by setting its IS-IS metric to 1000 in the NetBox web UI:
+
+| Step | Traffic Milan LAN to Rome LAN (one ping every 10 ms) |
+|---|---|
+| Drain (metric 1000) | 800 of 800 received, traffic moved via Bologna |
+| Undrain (metric cleared) | 800 of 800 received, traffic back on the direct link |
+
+The plan also caught a half finished change (only one end of the link edited) before anything was applied.
+
+**Drift detection.** [`drift-check.sh`](drift-check.sh) compares every running router with its generated config; all 11 routers are clean.
+
+**Continuous integration.** On every push, GitHub Actions runs [`ci/check.sh`](ci/check.sh): Python compiles, YAML parses, shellcheck finds no errors, the configs rendered offline from [`netbox/snapshot.json`](netbox/snapshot.json) match the committed ones, and every config passes FRR's own parser in the official FRR image. A deliberately broken config was used to confirm the parser check fails as it should.
+
 ### Failover results
 
 | Failure | Result |
@@ -155,6 +174,7 @@ sudo ./verify-loss.sh down                         # traffic loss when a core li
 sudo ./verify-access.sh                            # BNG and DHCP
 sudo ./verify-cgnat.sh                             # CGNAT
 sudo ./verify-dns.sh                               # anycast DNS and failover
+sudo ./verify-all.sh                               # every test above, with a PASS or FAIL summary
 sudo containerlab destroy -t mini-iliad.clab.yml   # removes everything
 ```
 
@@ -173,7 +193,7 @@ The host kernel needs the mpls_router, mpls_iptunnel and sch_netem modules; setu
 - [x] Phase 3: iBGP route reflectors, transit edge, routing policy, internet exchange
 - [x] Phase 4: SR-MPLS and BFD (silent failure 28.9 s to 0.34 s); TI-LFA measured and rejected on Linux
 - [x] Phase 5: BNG with DHCP, CGNAT, anycast DNS, a real home connected over WireGuard
-- [ ] Phase 6: NetBox as source of truth, config generation and CI testing with GitHub Actions
+- [x] Phase 6: NetBox as source of truth, configs generated from it, plan and apply deploys, drift check, CI with GitHub Actions
 - [ ] Phase 7: streaming telemetry with Prometheus and Grafana
 
 ## Author
