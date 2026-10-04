@@ -13,7 +13,7 @@ topology:
       net.mpls.platform_labels: "1048575"
   nodes:
     milan:
-      binds: [configs/milan.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/milan.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1 eth2 eth3 eth4 eth5; do sysctl -w net.mpls.conf.$i.input=1; done'
@@ -21,7 +21,7 @@ topology:
         - ip link set cust0 up
         - ip addr add 192.0.2.1/26 dev cust0
     rome:
-      binds: [configs/rome.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/rome.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1 eth2 eth3; do sysctl -w net.mpls.conf.$i.input=1; done'
@@ -29,7 +29,7 @@ topology:
         - ip link set cust0 up
         - ip addr add 192.0.2.65/26 dev cust0
     naples:
-      binds: [configs/naples.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/naples.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1 eth2 eth3; do sysctl -w net.mpls.conf.$i.input=1; done'
@@ -37,7 +37,7 @@ topology:
         - ip link set cust0 up
         - ip addr add 192.0.2.129/26 dev cust0
     bologna:
-      binds: [configs/bologna.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/bologna.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1 eth2; do sysctl -w net.mpls.conf.$i.input=1; done'
@@ -45,22 +45,22 @@ topology:
         - ip link set cust0 up
         - ip addr add 192.0.2.193/26 dev cust0
     rr1:
-      binds: [configs/rr1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/rr1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     rr2:
-      binds: [configs/rr2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/rr2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     br1:
-      binds: [configs/br1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/br1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     br2:
-      binds: [configs/br2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/br2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
@@ -109,7 +109,7 @@ topology:
         - ip addr add 198.18.2.1/24 dev svc0
 
     bng:
-      binds: [configs/bng.conf:/etc/frr/frr.conf, secrets/wg0.conf:/etc/wireguard/wg0.conf, configs/cgnat.nft:/etc/cgnat.nft, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/bng.conf:/etc/frr/frr.conf, secrets/wg0.conf:/etc/wireguard/wg0.conf, configs/cgnat.nft:/etc/cgnat.nft, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       ports: ["51820:51820/udp"]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
@@ -141,7 +141,7 @@ topology:
         - udhcpc -i eth1 -n -q -t 20 -T 2 -s /etc/udhcpc-lab.sh
 
     dns-mi:
-      binds: [configs/dns-mi.conf:/etc/frr/frr.conf, configs/unbound-mi.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/dns-mi.conf:/etc/frr/frr.conf, configs/unbound-mi.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - apk add --no-cache -q unbound
         - ip link add any0 type dummy
@@ -149,7 +149,7 @@ topology:
         - ip addr add 192.0.2.53/32 dev any0
         - unbound -c /etc/unbound/unbound.conf
     dns-na:
-      binds: [configs/dns-na.conf:/etc/frr/frr.conf, configs/unbound-na.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [generated/dns-na.conf:/etc/frr/frr.conf, configs/unbound-na.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - apk add --no-cache -q unbound
         - ip link add any0 type dummy

@@ -1,3 +1,4 @@
 clab-*/
 .*.clab.yml.bak
 secrets/
+logs/

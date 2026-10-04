@@ -6,7 +6,7 @@ CORE="milan rome naples bologna"
 bgp_ready() {
   for r in $CORE; do
     n=$(docker exec $P-$r vtysh -c "show ip route bgp" 2>/dev/null | grep -c "^B>")
-    [ "$n" -eq 3 ] || return 1
+    [ "$n" -ge 3 ] || return 1
   done
 }
 

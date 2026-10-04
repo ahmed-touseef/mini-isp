@@ -1,0 +1,56 @@
+! Generated from NetBox by netbox/render.py. Do not edit by hand:
+! change NetBox (underlay) or configs/policy/{{ name }}.conf (BGP and policy), then re-render.
+frr defaults traditional
+hostname {{ name }}
+service integrated-vtysh-config
+no zebra nexthop kernel enable
+no ip nht resolve-via-default
+!
+bfd
+ profile FAST
+  detect-multiplier 3
+  receive-interval 100
+  transmit-interval 100
+ exit
+exit
+!
+{% for i in interfaces %}
+interface {{ i.name }}
+{% if i.desc %}
+ description {{ i.desc }}
+{% endif %}
+{% for a in i.ips %}
+ ip address {{ a }}
+{% endfor %}
+{% if i.isis %}
+ ip router isis CORE
+{% if i.name == "lo" %}
+ isis passive
+{% else %}
+ isis network point-to-point
+{% if i.metric %}
+ isis metric {{ i.metric }}
+{% endif %}
+ isis bfd
+ isis bfd profile FAST
+{% endif %}
+{% endif %}
+exit
+!
+{% endfor %}
+router isis CORE
+ is-type level-2-only
+ net 49.0001.0102.5500.{{ "%04d" | format(idx) }}.00
+ lsp-gen-interval 1
+ spf-interval 1
+{% if overload %}
+ set-overload-bit
+{% endif %}
+{% if sr %}
+ segment-routing on
+ segment-routing global-block 16000 23999
+ segment-routing prefix 10.255.0.{{ idx }}/32 index {{ idx }}
+{% endif %}
+exit
+!
+{{ policy }}
