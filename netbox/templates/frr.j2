@@ -5,10 +5,10 @@ hostname {{ name }}
 service integrated-vtysh-config
 no zebra nexthop kernel enable
 no ip nht resolve-via-default
+ipv6 forwarding
 !
 bfd
  profile FAST
-  detect-multiplier 3
   receive-interval 100
   transmit-interval 100
  exit
@@ -41,14 +41,12 @@ exit
 router isis CORE
  is-type level-2-only
  net 49.0001.0102.5500.{{ "%04d" | format(idx) }}.00
- lsp-gen-interval 1
- spf-interval 1
+ lsp-timers gen-interval 1 refresh-interval 900 max-lifetime 1200
 {% if overload %}
  set-overload-bit
 {% endif %}
 {% if sr %}
  segment-routing on
- segment-routing global-block 16000 23999
  segment-routing prefix 10.255.0.{{ idx }}/32 index {{ idx }}
 {% endif %}
 exit
