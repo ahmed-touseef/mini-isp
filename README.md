@@ -1,6 +1,6 @@
 # Mini ISP: a virtual Italian service provider network
 
-A service provider network built as code with [containerlab](https://containerlab.dev) and [FRRouting](https://frrouting.org), running on a Hetzner cloud server. Fifteen routers form a complete ISP: an IS-IS backbone, iBGP with route reflectors, two transit providers, and peering at an internet exchange. The whole network is defined in text files, rebuilt with one command, and checked by automated test scripts.
+A service provider network built as code with [containerlab](https://containerlab.dev) and [FRRouting](https://frrouting.org), running on a Hetzner cloud server. Fifteen routers form a complete ISP: an IS-IS backbone with Segment Routing MPLS and BFD, iBGP with route reflectors, two transit providers, and peering at an internet exchange. The whole network is defined in text files, rebuilt with one command, and checked by automated test scripts.
 
 ## Topology
 
@@ -71,6 +71,30 @@ The test script makes the simulated internet announce a private prefix, a more s
 ### Phase 3d: peering at an internet exchange
 A simulated MIX exchange with a transparent route server (it keeps the original next hop and does not insert its own AS). Peering routes get local preference 300, giving the classic hierarchy **peering > preferred transit > backup transit**. Traffic to peers goes directly across the exchange in 2 hops instead of 4 through transit. An AS path filter accepts only routes originated by the peer itself: when a peer deliberately leaks its transit routes, they are rejected.
 
+### Phase 4a: MPLS with Segment Routing
+IS-IS carries Segment Routing labels: every router has a node SID (16000 plus its index) and FRR allocates an adjacency SID for every link. Customer and internet traffic is label switched: Milan reaches the Naples pool with label 16003, and traffic towards the internet carries the label of its exit border router. MPLS is enabled only on internal interfaces, so no labels are accepted from transit providers or the exchange.
+
+**Kernel finding.** On Linux 7.0, MPLS label routes with more than one next hop are installed as `dead linkdown` and drop traffic. This was confirmed with a label route created by hand with `ip`, without FRR involved. Two changes work around it: `no zebra nexthop kernel enable`, which fixes ECMP for IP routes entering the MPLS network, and a deliberate IS-IS metric of 15 on the Bologna to Milan link, so that no equal cost paths exist in the label table.
+
+### Phase 4b: BFD
+BFD at 100 ms × 3 on every internal IS-IS link. Test: a silent failure where every packet on the Milan to Rome link is dropped (netem) while both interfaces stay up.
+
+| Silent failure on Milan to Rome | Detection and reroute |
+|---|---|
+| IS-IS hellos only | 28,883 ms |
+| With BFD | **337 ms** |
+
+### Phase 4c: TI-LFA, measured and rejected
+TI-LFA computed correct repair paths (for example, Rome protected via Bologna with label 16002). Traffic loss was measured with one ping every 10 ms while the Milan to Rome link went down:
+
+| Link down on Milan to Rome | Traffic lost |
+|---|---|
+| Without TI-LFA | 180 ms |
+| With TI-LFA | 990 ms |
+| With TI-LFA, IS-IS process frozen on Milan | 3,990 ms (everything after the cut) |
+
+Freezing IS-IS proved that the kernel never used the precomputed backup: Linux has no backup next hop concept, so the repair path exists only in FRR's own table. Computing backups also added SPF work, which pushed normal recovery into the SPF throttle window. On carrier routers the backup is programmed into the forwarding hardware and switches in under 50 ms; in this Linux lab TI-LFA was disabled. [`phase4c-tilfa.sh`](phase4c-tilfa.sh) is kept as a record of the experiment.
+
 ### Failover results
 
 | Failure | Result |
@@ -79,6 +103,8 @@ A simulated MIX exchange with a transparent route server (it keeps the original 
 | Route reflector down | no routes or traffic lost |
 | Preferred transit down | all traffic moved to the backup provider in 2 s |
 | Exchange session down | peer traffic fell back to transit in 1 s |
+| Core link down, measured with 10 ms pings | 180 ms of traffic loss |
+| Silent core link failure, detected by BFD | 360 ms of traffic loss |
 
 ## Run it yourself
 
@@ -94,6 +120,9 @@ sudo ./verify-bgp.sh                               # iBGP and route reflectors
 sudo ./verify-edge.sh                              # transit edge
 sudo ./verify-policy.sh                            # routing policy and filtering
 sudo ./verify-ix.sh                                # internet exchange peering
+sudo ./verify-sr.sh                                # segment routing labels
+sudo ./verify-bfd.sh                               # silent failure with BFD
+sudo ./verify-loss.sh down                         # traffic loss when a core link fails
 sudo containerlab destroy -t mini-iliad.clab.yml   # removes everything
 ```
 
@@ -103,12 +132,14 @@ The `phase*.sh` scripts are kept as a record of how each change was made. The co
 
 The documentation ranges 192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24 and the benchmarking range 198.18.0.0/15 are bogons on the real internet. This lab uses them as its "public" address space, so they are exempt from the bogon filters. All AS numbers are private; the provider names are only labels.
 
+The host kernel needs the mpls_router, mpls_iptunnel and sch_netem modules; setup.sh loads them.
+
 ## Roadmap
 
 - [x] Phase 1: OSPF core ring
 - [x] Phase 2: OSPF to IS-IS migration, fast convergence
 - [x] Phase 3: iBGP route reflectors, transit edge, routing policy, internet exchange
-- [ ] Phase 4: MPLS, BFD and TI-LFA for sub second failover
+- [x] Phase 4: SR-MPLS and BFD (silent failure 28.9 s to 0.34 s); TI-LFA measured and rejected on Linux
 - [ ] Phase 5: customers with DHCP, CGNAT and DNS, plus a real home connection over WireGuard
 - [ ] Phase 6: NetBox as source of truth, config generation and CI testing with GitHub Actions
 - [ ] Phase 7: streaming telemetry with Prometheus and Grafana

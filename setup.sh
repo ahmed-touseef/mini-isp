@@ -17,4 +17,5 @@ fi
 
 docker --version
 containerlab version
+modprobe -a mpls_router mpls_iptunnel sch_netem
 echo "Setup done. Next: sudo containerlab deploy -t mini-iliad.clab.yml"
