@@ -109,11 +109,12 @@ topology:
         - ip addr add 198.18.2.1/24 dev svc0
 
     bng:
-      binds: [configs/bng.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [configs/bng.conf:/etc/frr/frr.conf, configs/cgnat.nft:/etc/cgnat.nft, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sysctl -w net.mpls.conf.eth1.input=1
-        - apk add --no-cache -q dnsmasq nftables
+        - apk add --no-cache -q dnsmasq nftables conntrack-tools
+        - nft -f /etc/cgnat.nft
         - ip addr add 100.64.0.1/24 dev eth2
         - dnsmasq --interface=eth2 --bind-interfaces --port=0 --dhcp-range=100.64.0.10,100.64.0.200,255.255.255.0,1h --dhcp-option=option:router,100.64.0.1 --dhcp-leasefile=/tmp/dnsmasq.leases
     olt:
