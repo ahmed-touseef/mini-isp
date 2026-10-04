@@ -9,11 +9,14 @@ topology:
   defaults:
     kind: linux
     image: quay.io/frrouting/frr:10.2.1
+    sysctls:
+      net.mpls.platform_labels: "1048575"
   nodes:
     milan:
       binds: [configs/milan.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1 eth2 eth3 eth4; do sysctl -w net.mpls.conf.$i.input=1; done'
         - ip link add cust0 type dummy
         - ip link set cust0 up
         - ip addr add 192.0.2.1/26 dev cust0
@@ -21,6 +24,7 @@ topology:
       binds: [configs/rome.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1 eth2 eth3; do sysctl -w net.mpls.conf.$i.input=1; done'
         - ip link add cust0 type dummy
         - ip link set cust0 up
         - ip addr add 192.0.2.65/26 dev cust0
@@ -28,6 +32,7 @@ topology:
       binds: [configs/naples.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1 eth2 eth3; do sysctl -w net.mpls.conf.$i.input=1; done'
         - ip link add cust0 type dummy
         - ip link set cust0 up
         - ip addr add 192.0.2.129/26 dev cust0
@@ -35,6 +40,7 @@ topology:
       binds: [configs/bologna.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1 eth2; do sysctl -w net.mpls.conf.$i.input=1; done'
         - ip link add cust0 type dummy
         - ip link set cust0 up
         - ip addr add 192.0.2.193/26 dev cust0
@@ -42,18 +48,22 @@ topology:
       binds: [configs/rr1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     rr2:
       binds: [configs/rr2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     br1:
       binds: [configs/br1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     br2:
       binds: [configs/br2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
+        - sh -c 'for i in eth1; do sysctl -w net.mpls.conf.$i.input=1; done'
     arelion:
       binds: [configs/arelion.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
       exec:
