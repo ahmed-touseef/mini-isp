@@ -2,3 +2,4 @@ clab-*/
 .*.clab.yml.bak
 secrets/
 logs/
+__pycache__/

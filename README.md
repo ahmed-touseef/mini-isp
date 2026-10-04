@@ -1,5 +1,7 @@
 # Mini ISP: a virtual Italian service provider network
 
+[![CI](https://github.com/ahmed-touseef/mini-isp/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmed-touseef/mini-isp/actions/workflows/ci.yml)
+
 A service provider network built as code with [containerlab](https://containerlab.dev) and [FRRouting](https://frrouting.org), running on a Hetzner cloud server. Fifteen routers form a complete ISP: an IS-IS backbone with Segment Routing MPLS and BFD, iBGP with route reflectors, two transit providers, and peering at an internet exchange. The whole network is defined in text files, rebuilt with one command, and checked by automated test scripts.
 
 ## Topology

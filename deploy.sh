@@ -9,7 +9,7 @@ MODE=${1:-}; shift || true
 [ "$MODE" = plan ] || [ "$MODE" = apply ] || { echo "usage: $0 plan|apply <device> [device ...]"; exit 1; }
 [ $# -gt 0 ] || { echo "name at least one device"; exit 1; }
 
-python3 netbox/render.py "$@"
+python3 netbox/render.py
 FILES=$(printf 'generated/%s.conf ' "$@")
 echo "== Config file changes =="
 git --no-pager diff -U0 -- $FILES | grep -E '^(\+\+\+|[+-][^+-])' || echo "  (no file changes)"

@@ -1,0 +1,532 @@
+{
+ "devices": [
+  {
+   "name": "arelion",
+   "role": "transit-provider"
+  },
+  {
+   "name": "bng",
+   "role": "bng"
+  },
+  {
+   "name": "bologna",
+   "role": "core-router"
+  },
+  {
+   "name": "br1",
+   "role": "border-router"
+  },
+  {
+   "name": "br2",
+   "role": "border-router"
+  },
+  {
+   "name": "cogent",
+   "role": "transit-provider"
+  },
+  {
+   "name": "dns-mi",
+   "role": "dns-resolver"
+  },
+  {
+   "name": "dns-na",
+   "role": "dns-resolver"
+  },
+  {
+   "name": "fastweb",
+   "role": "peer"
+  },
+  {
+   "name": "home1",
+   "role": "customer"
+  },
+  {
+   "name": "home2",
+   "role": "customer"
+  },
+  {
+   "name": "internet",
+   "role": "internet"
+  },
+  {
+   "name": "milan",
+   "role": "core-router"
+  },
+  {
+   "name": "mix",
+   "role": "exchange-switch"
+  },
+  {
+   "name": "naples",
+   "role": "core-router"
+  },
+  {
+   "name": "netflix",
+   "role": "peer"
+  },
+  {
+   "name": "olt",
+   "role": "access-switch-olt"
+  },
+  {
+   "name": "rome",
+   "role": "core-router"
+  },
+  {
+   "name": "rr1",
+   "role": "route-reflector"
+  },
+  {
+   "name": "rr2",
+   "role": "route-reflector"
+  },
+  {
+   "name": "rs",
+   "role": "route-server"
+  }
+ ],
+ "interfaces": {
+  "bng": [
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "milan:eth5"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth2",
+    "peer": "olt:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "wg0",
+    "peer": null
+   }
+  ],
+  "bologna": [
+   {
+    "isis_metric": null,
+    "name": "cust0",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "naples:eth2"
+   },
+   {
+    "isis_metric": 15,
+    "name": "eth2",
+    "peer": "milan:eth2"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "br1": [
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "milan:eth4"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth2",
+    "peer": "arelion:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth3",
+    "peer": "mix:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "br2": [
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "rome:eth3"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth2",
+    "peer": "cogent:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "dns-mi": [
+   {
+    "isis_metric": null,
+    "name": "any0",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "milan:eth6"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "dns-na": [
+   {
+    "isis_metric": null,
+    "name": "any0",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "naples:eth4"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "milan": [
+   {
+    "isis_metric": null,
+    "name": "cust0",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "rome:eth1"
+   },
+   {
+    "isis_metric": 15,
+    "name": "eth2",
+    "peer": "bologna:eth2"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth3",
+    "peer": "rr1:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth4",
+    "peer": "br1:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth5",
+    "peer": "bng:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth6",
+    "peer": "dns-mi:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "naples": [
+   {
+    "isis_metric": null,
+    "name": "cust0",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "rome:eth2"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth2",
+    "peer": "bologna:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth3",
+    "peer": "rr2:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth4",
+    "peer": "dns-na:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "rome": [
+   {
+    "isis_metric": null,
+    "name": "cust0",
+    "peer": null
+   },
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "milan:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth2",
+    "peer": "naples:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "eth3",
+    "peer": "br2:eth1"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "rr1": [
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "milan:eth3"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ],
+  "rr2": [
+   {
+    "isis_metric": null,
+    "name": "eth1",
+    "peer": "naples:eth3"
+   },
+   {
+    "isis_metric": null,
+    "name": "lo",
+    "peer": null
+   }
+  ]
+ },
+ "ips": {
+  "bng": [
+   {
+    "address": "10.0.0.17/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "100.64.0.1/24",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.255.0.7/32",
+    "interface": "lo"
+   },
+   {
+    "address": "100.64.1.1/24",
+    "interface": "wg0"
+   }
+  ],
+  "bologna": [
+   {
+    "address": "192.0.2.193/26",
+    "interface": "cust0"
+   },
+   {
+    "address": "10.0.0.5/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.0.0.6/31",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.255.0.4/32",
+    "interface": "lo"
+   }
+  ],
+  "br1": [
+   {
+    "address": "10.0.0.13/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.100.1.0/31",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.200.0.2/24",
+    "interface": "eth3"
+   },
+   {
+    "address": "10.255.0.5/32",
+    "interface": "lo"
+   }
+  ],
+  "br2": [
+   {
+    "address": "10.0.0.15/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.100.2.0/31",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.255.0.6/32",
+    "interface": "lo"
+   }
+  ],
+  "dns-mi": [
+   {
+    "address": "192.0.2.53/32",
+    "interface": "any0"
+   },
+   {
+    "address": "10.0.0.19/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.255.0.8/32",
+    "interface": "lo"
+   }
+  ],
+  "dns-na": [
+   {
+    "address": "192.0.2.53/32",
+    "interface": "any0"
+   },
+   {
+    "address": "10.0.0.21/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.255.0.9/32",
+    "interface": "lo"
+   }
+  ],
+  "milan": [
+   {
+    "address": "192.0.2.1/26",
+    "interface": "cust0"
+   },
+   {
+    "address": "10.0.0.0/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.0.0.7/31",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.0.0.8/31",
+    "interface": "eth3"
+   },
+   {
+    "address": "10.0.0.12/31",
+    "interface": "eth4"
+   },
+   {
+    "address": "10.0.0.16/31",
+    "interface": "eth5"
+   },
+   {
+    "address": "10.0.0.18/31",
+    "interface": "eth6"
+   },
+   {
+    "address": "10.255.0.1/32",
+    "interface": "lo"
+   }
+  ],
+  "naples": [
+   {
+    "address": "192.0.2.129/26",
+    "interface": "cust0"
+   },
+   {
+    "address": "10.0.0.3/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.0.0.4/31",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.0.0.10/31",
+    "interface": "eth3"
+   },
+   {
+    "address": "10.0.0.20/31",
+    "interface": "eth4"
+   },
+   {
+    "address": "10.255.0.3/32",
+    "interface": "lo"
+   }
+  ],
+  "rome": [
+   {
+    "address": "192.0.2.65/26",
+    "interface": "cust0"
+   },
+   {
+    "address": "10.0.0.1/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.0.0.2/31",
+    "interface": "eth2"
+   },
+   {
+    "address": "10.0.0.14/31",
+    "interface": "eth3"
+   },
+   {
+    "address": "10.255.0.2/32",
+    "interface": "lo"
+   }
+  ],
+  "rr1": [
+   {
+    "address": "10.0.0.9/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.255.0.11/32",
+    "interface": "lo"
+   }
+  ],
+  "rr2": [
+   {
+    "address": "10.0.0.11/31",
+    "interface": "eth1"
+   },
+   {
+    "address": "10.255.0.12/32",
+    "interface": "lo"
+   }
+  ]
+ }
+}
