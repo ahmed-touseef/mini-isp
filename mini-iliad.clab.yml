@@ -1,4 +1,4 @@
-# Mini Iliad Phase 1: four router OSPF core ring (FRR)
+# Mini Iliad: IS-IS core ring with iBGP route reflectors (FRR)
 name: miniiliad
 
 mgmt:
@@ -9,20 +9,48 @@ topology:
   defaults:
     kind: linux
     image: quay.io/frrouting/frr:10.2.1
-    exec:
-      - sysctl -w net.ipv4.ip_forward=1
   nodes:
     milan:
       binds: [configs/milan.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link add cust0 type dummy
+        - ip link set cust0 up
+        - ip addr add 192.0.2.1/26 dev cust0
     rome:
       binds: [configs/rome.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link add cust0 type dummy
+        - ip link set cust0 up
+        - ip addr add 192.0.2.65/26 dev cust0
     naples:
       binds: [configs/naples.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link add cust0 type dummy
+        - ip link set cust0 up
+        - ip addr add 192.0.2.129/26 dev cust0
     bologna:
       binds: [configs/bologna.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link add cust0 type dummy
+        - ip link set cust0 up
+        - ip addr add 192.0.2.193/26 dev cust0
+    rr1:
+      binds: [configs/rr1.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+    rr2:
+      binds: [configs/rr2.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
 
   links:
     - endpoints: ["milan:eth1", "rome:eth1"]       # 10.0.0.0/31
     - endpoints: ["rome:eth2", "naples:eth1"]      # 10.0.0.2/31
     - endpoints: ["naples:eth2", "bologna:eth1"]   # 10.0.0.4/31
     - endpoints: ["bologna:eth2", "milan:eth2"]    # 10.0.0.6/31
+    - endpoints: ["milan:eth3", "rr1:eth1"]        # 10.0.0.8/31
+    - endpoints: ["naples:eth3", "rr2:eth1"]       # 10.0.0.10/31
