@@ -109,12 +109,17 @@ topology:
         - ip addr add 198.18.2.1/24 dev svc0
 
     bng:
-      binds: [configs/bng.conf:/etc/frr/frr.conf, configs/cgnat.nft:/etc/cgnat.nft, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      binds: [configs/bng.conf:/etc/frr/frr.conf, secrets/wg0.conf:/etc/wireguard/wg0.conf, configs/cgnat.nft:/etc/cgnat.nft, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      ports: ["51820:51820/udp"]
       exec:
         - sysctl -w net.ipv4.ip_forward=1
         - sysctl -w net.mpls.conf.eth1.input=1
-        - apk add --no-cache -q dnsmasq nftables conntrack-tools
+        - apk add --no-cache -q dnsmasq nftables conntrack-tools wireguard-tools
         - nft -f /etc/cgnat.nft
+        - ip link add wg0 type wireguard
+        - wg setconf wg0 /etc/wireguard/wg0.conf
+        - ip addr add 100.64.1.1/24 dev wg0
+        - ip link set wg0 up
         - ip addr add 100.64.0.1/24 dev eth2
         - dnsmasq --interface=eth2 --bind-interfaces --port=0 --dhcp-range=100.64.0.10,100.64.0.200,255.255.255.0,1h --dhcp-option=option:router,100.64.0.1 --dhcp-option=option:dns-server,192.0.2.53 --dhcp-leasefile=/tmp/dnsmasq.leases
     olt:

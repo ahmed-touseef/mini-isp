@@ -1,7 +1,7 @@
-# CGNAT: homes in 100.64.0.0/24 (RFC 6598) share the public pool 192.0.2.33 to 192.0.2.46
+# CGNAT: homes in 100.64.0.0/16 (RFC 6598) share the public pool 192.0.2.33 to 192.0.2.46
 table ip cgnat {
   chain postrouting {
     type nat hook postrouting priority srcnat; policy accept;
-    ip saddr 100.64.0.0/24 oifname "eth1" snat to 192.0.2.33-192.0.2.46 persistent
+    ip saddr 100.64.0.0/16 oifname "eth1" snat to 192.0.2.33-192.0.2.46 persistent
   }
 }

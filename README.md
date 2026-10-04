@@ -15,6 +15,9 @@ graph LR
     NAPLES --- RR2["rr2 (route reflector)"]
     MILAN --- BR1["br1 (border)"]
     ROME --- BR2["br2 (border)"]
+    MILAN --- BNG["bng (broadband gateway)"]
+    MILAN --- DNSMI["dns-mi, anycast 192.0.2.53"]
+    NAPLES --- DNSNA["dns-na, anycast 192.0.2.53"]
   end
   BR1 --- ARELION["Arelion, AS 65101 (transit)"]
   BR2 --- COGENT["Cogent, AS 65102 (transit)"]
@@ -26,6 +29,10 @@ graph LR
   NETFLIX["Netflix, AS 65402"] --- MIX
   FASTWEB --- INTERNET
   NETFLIX --- INTERNET
+  BNG --- OLT(("OLT"))
+  OLT --- HOME1["home1"]
+  OLT --- HOME2["home2"]
+  PC["Real home PC"] -. WireGuard .-> BNG
 ```
 
 | Role | Devices | Addressing |
@@ -36,6 +43,8 @@ graph LR
 | Customer pools | one per city | 192.0.2.0/24 split into four /26 |
 | Transit links | br1 to Arelion, br2 to Cogent | 10.100.0.0/16 |
 | Exchange LAN | br1, route server, peers | 10.200.0.0/24 |
+| Access | bng, olt, home1, home2 | loopback 10.255.0.7, homes in 100.64.0.0/24, CGNAT pool 192.0.2.32/28 |
+| Anycast DNS | dns-mi, dns-na | loopbacks 10.255.0.8 and .9, shared 192.0.2.53 |
 
 ## What has been built
 
@@ -95,6 +104,22 @@ TI-LFA computed correct repair paths (for example, Rome protected via Bologna wi
 
 Freezing IS-IS proved that the kernel never used the precomputed backup: Linux has no backup next hop concept, so the repair path exists only in FRR's own table. Computing backups also added SPF work, which pushed normal recovery into the SPF throttle window. On carrier routers the backup is programmed into the forwarding hardware and switches in under 50 ms; in this Linux lab TI-LFA was disabled. [`phase4c-tilfa.sh`](phase4c-tilfa.sh) is kept as a record of the experiment.
 
+### Phase 5a: access network
+A BNG (broadband network gateway) attached to Milan serves homes through an OLT, simulated as a Linux bridge. Homes get addresses from 100.64.0.0/24 by DHCP (dnsmasq). The BNG is a full backbone router: IS-IS, Segment Routing (node SID 16007), BFD and iBGP.
+
+### Phase 5b: CGNAT
+nftables on the BNG translates 100.64.0.0/16 (RFC 6598 shared address space) to the public pool 192.0.2.33 to 192.0.2.46, with `persistent` so each home keeps the same public address. The pool is announced in BGP as a more specific /28. Unsolicited traffic from the internet is dropped, and the BNG's connection tracking table shows which subscriber used which public address, as needed for legal traceability.
+
+### Phase 5c: anycast DNS
+Two Unbound resolvers, one behind Milan and one behind Naples, share 192.0.2.53 and announce it in iBGP; DHCP hands it to homes. Every client reaches its nearest resolver, and a `whoami.lab` record shows which one answered. When the Milan resolver loses its link, the BNG switches to Naples in about 270 ms.
+
+Two lab findings were fixed along the way:
+- Docker bind-mounts `/etc/resolv.conf`, so the stock DHCP client script, which renames a temporary file over it, could not apply the DNS server. A small hook ([`configs/udhcpc.sh`](configs/udhcpc.sh)) writes it in place.
+- With FRR's traditional defaults, BGP next hops may resolve via the default route. Every container has a Docker management default route, so a dead next hop stayed "valid" and customer traffic leaked into the management network. `no ip nht resolve-via-default` on every router fixed it. On carrier routers, a management VRF provides this separation.
+
+### Phase 5d: a real home over WireGuard
+The BNG terminates WireGuard on UDP 51820, published on the server's public address. A Windows PC at home becomes subscriber 100.64.1.2: behind CGNAT, across the MPLS core, out via Arelion or directly across the exchange, and resolving lab names on the anycast resolver. The tunnel is split, so only lab ranges use it. Keys live in `secrets/`, which is never committed; run `./phase5d-wireguard.sh` to generate your own before deploying.
+
 ### Failover results
 
 | Failure | Result |
@@ -105,6 +130,7 @@ Freezing IS-IS proved that the kernel never used the precomputed backup: Linux h
 | Exchange session down | peer traffic fell back to transit in 1 s |
 | Core link down, measured with 10 ms pings | 180 ms of traffic loss |
 | Silent core link failure, detected by BFD | 360 ms of traffic loss |
+| Anycast DNS server lost | queries moved to the other resolver in about 270 ms |
 
 ## Run it yourself
 
@@ -114,6 +140,7 @@ Requires a Linux host with about 2 GB of free RAM.
 git clone https://github.com/ahmed-touseef/mini-isp.git
 cd mini-isp
 sudo ./setup.sh                                    # installs Docker and containerlab if missing
+./phase5d-wireguard.sh                              # generates your own WireGuard keys into secrets/
 sudo containerlab deploy -t mini-iliad.clab.yml    # builds all 15 routers
 sudo ./verify.sh                                   # IS-IS core
 sudo ./verify-bgp.sh                               # iBGP and route reflectors
@@ -123,6 +150,9 @@ sudo ./verify-ix.sh                                # internet exchange peering
 sudo ./verify-sr.sh                                # segment routing labels
 sudo ./verify-bfd.sh                               # silent failure with BFD
 sudo ./verify-loss.sh down                         # traffic loss when a core link fails
+sudo ./verify-access.sh                            # BNG and DHCP
+sudo ./verify-cgnat.sh                             # CGNAT
+sudo ./verify-dns.sh                               # anycast DNS and failover
 sudo containerlab destroy -t mini-iliad.clab.yml   # removes everything
 ```
 
@@ -140,7 +170,7 @@ The host kernel needs the mpls_router, mpls_iptunnel and sch_netem modules; setu
 - [x] Phase 2: OSPF to IS-IS migration, fast convergence
 - [x] Phase 3: iBGP route reflectors, transit edge, routing policy, internet exchange
 - [x] Phase 4: SR-MPLS and BFD (silent failure 28.9 s to 0.34 s); TI-LFA measured and rejected on Linux
-- [ ] Phase 5: customers with DHCP, CGNAT and DNS, plus a real home connection over WireGuard
+- [x] Phase 5: BNG with DHCP, CGNAT, anycast DNS, a real home connected over WireGuard
 - [ ] Phase 6: NetBox as source of truth, config generation and CI testing with GitHub Actions
 - [ ] Phase 7: streaming telemetry with Prometheus and Grafana
 
