@@ -116,7 +116,7 @@ topology:
         - apk add --no-cache -q dnsmasq nftables conntrack-tools
         - nft -f /etc/cgnat.nft
         - ip addr add 100.64.0.1/24 dev eth2
-        - dnsmasq --interface=eth2 --bind-interfaces --port=0 --dhcp-range=100.64.0.10,100.64.0.200,255.255.255.0,1h --dhcp-option=option:router,100.64.0.1 --dhcp-leasefile=/tmp/dnsmasq.leases
+        - dnsmasq --interface=eth2 --bind-interfaces --port=0 --dhcp-range=100.64.0.10,100.64.0.200,255.255.255.0,1h --dhcp-option=option:router,100.64.0.1 --dhcp-option=option:dns-server,192.0.2.53 --dhcp-leasefile=/tmp/dnsmasq.leases
     olt:
       exec:
         - ip link add br0 type bridge
@@ -125,13 +125,32 @@ topology:
         - ip link set eth2 master br0
         - ip link set eth3 master br0
     home1:
+      binds: [configs/udhcpc.sh:/etc/udhcpc-lab.sh]
       exec:
         - ip route del default
-        - udhcpc -i eth1 -n -q -t 20 -T 2
+        - udhcpc -i eth1 -n -q -t 20 -T 2 -s /etc/udhcpc-lab.sh
     home2:
+      binds: [configs/udhcpc.sh:/etc/udhcpc-lab.sh]
       exec:
         - ip route del default
-        - udhcpc -i eth1 -n -q -t 20 -T 2
+        - udhcpc -i eth1 -n -q -t 20 -T 2 -s /etc/udhcpc-lab.sh
+
+    dns-mi:
+      binds: [configs/dns-mi.conf:/etc/frr/frr.conf, configs/unbound-mi.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - apk add --no-cache -q unbound
+        - ip link add any0 type dummy
+        - ip link set any0 up
+        - ip addr add 192.0.2.53/32 dev any0
+        - unbound -c /etc/unbound/unbound.conf
+    dns-na:
+      binds: [configs/dns-na.conf:/etc/frr/frr.conf, configs/unbound-na.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - apk add --no-cache -q unbound
+        - ip link add any0 type dummy
+        - ip link set any0 up
+        - ip addr add 192.0.2.53/32 dev any0
+        - unbound -c /etc/unbound/unbound.conf
 
   links:
     - endpoints: ["milan:eth1", "rome:eth1"]           # 10.0.0.0/31
@@ -156,3 +175,5 @@ topology:
     - endpoints: ["bng:eth2", "olt:eth1"]              # access network 100.64.0.0/24
     - endpoints: ["home1:eth1", "olt:eth2"]
     - endpoints: ["home2:eth1", "olt:eth3"]
+    - endpoints: ["milan:eth6", "dns-mi:eth1"]         # 10.0.0.18/31
+    - endpoints: ["naples:eth4", "dns-na:eth1"]        # 10.0.0.20/31
