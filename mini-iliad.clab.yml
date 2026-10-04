@@ -71,6 +71,33 @@ topology:
         - ip addr add 198.51.100.1/24 dev web0
         - ip addr add 203.0.113.1/24 dev web0
 
+    mix:
+      exec:
+        - ip link add br0 type bridge
+        - ip link set br0 up
+        - ip link set eth1 master br0
+        - ip link set eth2 master br0
+        - ip link set eth3 master br0
+        - ip link set eth4 master br0
+    rs:
+      binds: [configs/rs.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+    fastweb:
+      binds: [configs/fastweb.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link add svc0 type dummy
+        - ip link set svc0 up
+        - ip addr add 198.18.1.1/24 dev svc0
+    netflix:
+      binds: [configs/netflix.conf:/etc/frr/frr.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]
+      exec:
+        - sysctl -w net.ipv4.ip_forward=1
+        - ip link add svc0 type dummy
+        - ip link set svc0 up
+        - ip addr add 198.18.2.1/24 dev svc0
+
   links:
     - endpoints: ["milan:eth1", "rome:eth1"]           # 10.0.0.0/31
     - endpoints: ["rome:eth2", "naples:eth1"]          # 10.0.0.2/31
@@ -84,3 +111,9 @@ topology:
     - endpoints: ["br2:eth2", "cogent:eth1"]           # 10.100.2.0/31
     - endpoints: ["arelion:eth2", "internet:eth1"]     # 10.100.3.0/31
     - endpoints: ["cogent:eth2", "internet:eth2"]      # 10.100.4.0/31
+    - endpoints: ["br1:eth3", "mix:eth1"]              # MIX peering LAN 10.200.0.0/24
+    - endpoints: ["rs:eth1", "mix:eth2"]
+    - endpoints: ["fastweb:eth1", "mix:eth3"]
+    - endpoints: ["netflix:eth1", "mix:eth4"]
+    - endpoints: ["fastweb:eth2", "internet:eth3"]     # 10.100.5.0/31
+    - endpoints: ["netflix:eth2", "internet:eth4"]     # 10.100.6.0/31
