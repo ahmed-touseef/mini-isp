@@ -11,12 +11,15 @@ A service provider network built as code with [containerlab](https://containerla
 
 The live dashboard ([noc.touseefahmed.com](https://noc.touseefahmed.com)): health of the whole network at a glance, and traffic on every direction of the core ring.
 
+![Mini ISP live dashboard: health and core ring traffic](docs/img/dashboard.png)
 
 Traffic at the internet edge (transit providers and the exchange) and towards customers (fibre homes behind CGNAT and the WireGuard home).
 
+![Internet edge and customer traffic](docs/img/edge.png)
 
 Prefixes received by the border routers from each transit provider and from the exchange route server, and the state of every BGP session.
 
+![BGP prefixes and sessions](docs/img/bgp.png)
 
 ## Topology
 
