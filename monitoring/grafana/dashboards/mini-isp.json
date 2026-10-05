@@ -1,0 +1,575 @@
+{
+ "title": "Mini ISP",
+ "uid": "mini-isp",
+ "schemaVersion": 39,
+ "refresh": "5s",
+ "tags": [
+  "mini-isp"
+ ],
+ "time": {
+  "from": "now-15m",
+  "to": "now"
+ },
+ "panels": [
+  {
+   "type": "stat",
+   "title": "Routers unreachable",
+   "gridPos": {
+    "x": 0,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "count(mini_isp_up == 0) or vector(0)"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "background",
+    "graphMode": "none"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 1,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "stat",
+   "title": "BGP sessions down",
+   "gridPos": {
+    "x": 4,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "count(mini_isp_bgp_session_up == 0) or vector(0)"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "background",
+    "graphMode": "none"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 2,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "stat",
+   "title": "IS-IS adjacencies missing",
+   "gridPos": {
+    "x": 8,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "(count(max_over_time(mini_isp_isis_adjacency_up[1h])) - count(mini_isp_isis_adjacency_up == 1)) or vector(0)"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "background",
+    "graphMode": "none"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 3,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "stat",
+   "title": "BFD sessions down",
+   "gridPos": {
+    "x": 12,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "(count(max_over_time(mini_isp_bfd_peer_up[1h])) - count(mini_isp_bfd_peer_up == 1)) or vector(0)"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "background",
+    "graphMode": "none"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "green",
+        "value": null
+       },
+       {
+        "color": "red",
+        "value": 1
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 4,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "stat",
+   "title": "CGNAT sessions",
+   "gridPos": {
+    "x": 16,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(mini_isp_cgnat_sessions)"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "background",
+    "graphMode": "none"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "blue",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 5,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "stat",
+   "title": "DHCP leases",
+   "gridPos": {
+    "x": 20,
+    "y": 0,
+    "w": 4,
+    "h": 4
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "sum(mini_isp_dhcp_leases)"
+    }
+   ],
+   "options": {
+    "reduceOptions": {
+     "calcs": [
+      "lastNotNull"
+     ]
+    },
+    "colorMode": "background",
+    "graphMode": "none"
+   },
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "blue",
+        "value": null
+       }
+      ]
+     }
+    },
+    "overrides": []
+   },
+   "id": 6,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Core ring traffic (bits/s, by direction)",
+   "gridPos": {
+    "x": 0,
+    "y": 4,
+    "w": 24,
+    "h": 10
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"milan\",iface=\"eth1\"}[30s]) * 8",
+     "legendFormat": "Milan \u2192 Rome"
+    },
+    {
+     "refId": "B",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"rome\",iface=\"eth1\"}[30s]) * 8",
+     "legendFormat": "Rome \u2192 Milan"
+    },
+    {
+     "refId": "C",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"milan\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "Milan \u2192 Bologna"
+    },
+    {
+     "refId": "D",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"bologna\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "Bologna \u2192 Milan"
+    },
+    {
+     "refId": "E",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"rome\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "Rome \u2192 Naples"
+    },
+    {
+     "refId": "F",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"naples\",iface=\"eth1\"}[30s]) * 8",
+     "legendFormat": "Naples \u2192 Rome"
+    },
+    {
+     "refId": "G",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"naples\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "Naples \u2192 Bologna"
+    },
+    {
+     "refId": "H",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"bologna\",iface=\"eth1\"}[30s]) * 8",
+     "legendFormat": "Bologna \u2192 Naples"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bps",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "lastNotNull",
+      "max"
+     ]
+    }
+   },
+   "id": 7,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Internet edge (bits/s)",
+   "gridPos": {
+    "x": 0,
+    "y": 14,
+    "w": 24,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"br1\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "to Arelion"
+    },
+    {
+     "refId": "B",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"br2\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "to Cogent"
+    },
+    {
+     "refId": "C",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"br1\",iface=\"eth3\"}[30s]) * 8",
+     "legendFormat": "to MIX exchange"
+    },
+    {
+     "refId": "D",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"milan\",iface=\"eth4\"}[30s]) * 8",
+     "legendFormat": "from core to br1"
+    },
+    {
+     "refId": "E",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"rome\",iface=\"eth3\"}[30s]) * 8",
+     "legendFormat": "from core to br2"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bps",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "lastNotNull",
+      "max"
+     ]
+    }
+   },
+   "id": 8,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Customers (bits/s)",
+   "gridPos": {
+    "x": 0,
+    "y": 22,
+    "w": 24,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"bng\",iface=\"eth2\"}[30s]) * 8",
+     "legendFormat": "to fibre homes"
+    },
+    {
+     "refId": "B",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"bng\",iface=\"wg0\"}[30s]) * 8",
+     "legendFormat": "to WireGuard home"
+    },
+    {
+     "refId": "C",
+     "expr": "rate(mini_isp_iface_tx_bytes_total{router=\"bng\",iface=\"eth1\"}[30s]) * 8",
+     "legendFormat": "BNG to core"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "unit": "bps",
+     "custom": {
+      "lineWidth": 2,
+      "fillOpacity": 10
+     }
+    },
+    "overrides": []
+   },
+   "options": {
+    "legend": {
+     "displayMode": "table",
+     "placement": "right",
+     "calcs": [
+      "lastNotNull",
+      "max"
+     ]
+    }
+   },
+   "id": 9,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "timeseries",
+   "title": "Prefixes received by the border routers",
+   "gridPos": {
+    "x": 0,
+    "y": 30,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mini_isp_bgp_prefixes_received{router=~\"br1|br2\",peer!~\"10\\\\.255\\\\..*\"}",
+     "legendFormat": "{{router}} from {{peer_name}}"
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "custom": {
+      "lineWidth": 2
+     }
+    },
+    "overrides": []
+   },
+   "id": 10,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  },
+  {
+   "type": "table",
+   "title": "BGP sessions (1 = Established)",
+   "gridPos": {
+    "x": 12,
+    "y": 30,
+    "w": 12,
+    "h": 8
+   },
+   "targets": [
+    {
+     "refId": "A",
+     "expr": "mini_isp_bgp_session_up",
+     "instant": true,
+     "format": "table"
+    }
+   ],
+   "transformations": [
+    {
+     "id": "organize",
+     "options": {
+      "excludeByName": {
+       "Time": true,
+       "__name__": true,
+       "instance": true,
+       "job": true
+      }
+     }
+    }
+   ],
+   "fieldConfig": {
+    "defaults": {
+     "thresholds": {
+      "mode": "absolute",
+      "steps": [
+       {
+        "color": "red",
+        "value": null
+       },
+       {
+        "color": "green",
+        "value": 1
+       }
+      ]
+     },
+     "custom": {
+      "cellOptions": {
+       "type": "color-background"
+      }
+     }
+    },
+    "overrides": []
+   },
+   "id": 11,
+   "datasource": {
+    "type": "prometheus",
+    "uid": "prom"
+   }
+  }
+ ]
+}

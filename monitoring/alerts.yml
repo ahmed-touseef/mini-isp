@@ -1,0 +1,33 @@
+groups:
+  - name: mini-isp
+    rules:
+      - alert: RouterUnreachable
+        expr: mini_isp_up == 0
+        for: 20s
+        labels: {severity: critical}
+        annotations:
+          summary: "The exporter cannot read {{ $labels.router }}"
+      - alert: BGPSessionDown
+        expr: mini_isp_bgp_session_up == 0
+        for: 20s
+        labels: {severity: critical}
+        annotations:
+          summary: "BGP session {{ $labels.router }} to {{ $labels.peer_name }} is down"
+      - alert: ISISAdjacencyMissing
+        expr: count(max_over_time(mini_isp_isis_adjacency_up[1h])) - count(mini_isp_isis_adjacency_up == 1) > 0
+        for: 20s
+        labels: {severity: critical}
+        annotations:
+          summary: "{{ $value }} IS-IS adjacency(ies) seen in the last hour are not up"
+      - alert: BFDSessionDown
+        expr: count(max_over_time(mini_isp_bfd_peer_up[1h])) - count(mini_isp_bfd_peer_up == 1) > 0
+        for: 20s
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $value }} BFD session(s) seen in the last hour are not up"
+      - alert: InterfaceDown
+        expr: mini_isp_iface_up{iface=~"eth.*"} == 0
+        for: 20s
+        labels: {severity: warning}
+        annotations:
+          summary: "{{ $labels.router }} {{ $labels.iface }} has no carrier"
