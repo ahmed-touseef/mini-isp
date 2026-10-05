@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/ahmed-touseef/mini-isp/actions/workflows/ci.yml/badge.svg)](https://github.com/ahmed-touseef/mini-isp/actions/workflows/ci.yml)
 
+**Live dashboard:** [noc.touseefahmed.com](https://noc.touseefahmed.com), read only, updated every 10 seconds from the running lab.
+
 
 A service provider network built as code with [containerlab](https://containerlab.dev) and [FRRouting](https://frrouting.org), running on a Hetzner cloud server. Fifteen routers form a complete ISP: an IS-IS backbone with Segment Routing MPLS and BFD, iBGP with route reflectors, two transit providers, and peering at an internet exchange. The whole network is defined in text files, rebuilt with one command, and checked by automated test scripts.
 
@@ -143,6 +145,20 @@ The plan also caught a half finished change (only one end of the link edited) be
 
 **Continuous integration.** On every push, GitHub Actions runs [`ci/check.sh`](ci/check.sh): Python compiles, YAML parses, shellcheck finds no errors, the configs rendered offline from [`netbox/snapshot.json`](netbox/snapshot.json) match the committed ones, and every config passes FRR's own parser in the official FRR image. A deliberately broken config was used to confirm the parser check fails as it should.
 
+### Phase 7: telemetry with Prometheus and Grafana
+A small exporter ([`monitoring/exporter.py`](monitoring/exporter.py), a systemd service) polls the 11 routers every 10 seconds and publishes Prometheus metrics: traffic and link state per interface, BGP sessions and prefixes received per peer, IS-IS adjacencies, BFD sessions, CGNAT translations, DHCP leases and the WireGuard handshake. One collection cycle across all routers takes under a second. Prometheus scrapes it and evaluates five alert rules ([`monitoring/alerts.yml`](monitoring/alerts.yml)); Grafana shows a dashboard that is provisioned as code ([`monitoring/grafana/`](monitoring/grafana/)). Everything listens on localhost only.
+
+With 20 Mbit/s of demo traffic ([`traffic.sh`](traffic.sh)) the dashboard shows the network react live:
+
+| Event | What telemetry showed |
+|---|---|
+| Milan to Rome drained from NetBox (metric 1000) | 20.8 Mbit/s left the direct link and appeared on Milan to Bologna, Bologna to Naples and Naples to Rome |
+| Link undrained | traffic back on the direct link (20.7 Mbit/s) |
+| BGP session br1 to Arelion shut down | alert "BGP session br1 to ARELION is down" fired after its 20 second window; customer traffic moved to Cogent |
+| Session restored | alert cleared by itself, traffic back on Arelion |
+
+A read only copy of the dashboard is published at [noc.touseefahmed.com](https://noc.touseefahmed.com) through Nginx, which exposes only the shared dashboard, its static files and its rate limited data API ([`monitoring/nginx-noc.conf`](monitoring/nginx-noc.conf)). The Grafana login and admin API are not reachable from outside.
+
 ### Failover results
 
 | Failure | Result |
@@ -177,6 +193,7 @@ sudo ./verify-access.sh                            # BNG and DHCP
 sudo ./verify-cgnat.sh                             # CGNAT
 sudo ./verify-dns.sh                               # anycast DNS and failover
 sudo ./verify-all.sh                               # every test above, with a PASS or FAIL summary
+sudo ./traffic.sh start                           # demo traffic for the dashboards (./traffic.sh stop to end it)
 sudo containerlab destroy -t mini-iliad.clab.yml   # removes everything
 ```
 
@@ -196,7 +213,7 @@ The host kernel needs the mpls_router, mpls_iptunnel and sch_netem modules; setu
 - [x] Phase 4: SR-MPLS and BFD (silent failure 28.9 s to 0.34 s); TI-LFA measured and rejected on Linux
 - [x] Phase 5: BNG with DHCP, CGNAT, anycast DNS, a real home connected over WireGuard
 - [x] Phase 6: NetBox as source of truth, configs generated from it, plan and apply deploys, drift check, CI with GitHub Actions
-- [ ] Phase 7: streaming telemetry with Prometheus and Grafana
+- [x] Phase 7: telemetry with Prometheus and Grafana, alert rules, public live dashboard
 
 ## Author
 
