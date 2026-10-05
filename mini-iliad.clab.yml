@@ -133,12 +133,12 @@ topology:
       binds: [configs/udhcpc.sh:/etc/udhcpc-lab.sh]
       exec:
         - ip route del default
-        - udhcpc -i eth1 -n -q -t 20 -T 2 -s /etc/udhcpc-lab.sh
+        - udhcpc -i eth1 -n -t 20 -T 2 -s /etc/udhcpc-lab.sh
     home2:
       binds: [configs/udhcpc.sh:/etc/udhcpc-lab.sh]
       exec:
         - ip route del default
-        - udhcpc -i eth1 -n -q -t 20 -T 2 -s /etc/udhcpc-lab.sh
+        - udhcpc -i eth1 -n -t 20 -T 2 -s /etc/udhcpc-lab.sh
 
     dns-mi:
       binds: [generated/dns-mi.conf:/etc/frr/frr.conf, configs/unbound-mi.conf:/etc/unbound/unbound.conf, configs/daemons:/etc/frr/daemons, configs/vtysh.conf:/etc/frr/vtysh.conf]

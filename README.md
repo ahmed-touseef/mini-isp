@@ -7,6 +7,17 @@
 
 A service provider network built as code with [containerlab](https://containerlab.dev) and [FRRouting](https://frrouting.org), running on a Hetzner cloud server. Fifteen routers form a complete ISP: an IS-IS backbone with Segment Routing MPLS and BFD, iBGP with route reflectors, two transit providers, and peering at an internet exchange. The whole network is defined in text files, rebuilt with one command, and checked by automated test scripts.
 
+## Screenshots
+
+The live dashboard ([noc.touseefahmed.com](https://noc.touseefahmed.com)): health of the whole network at a glance, and traffic on every direction of the core ring.
+
+
+Traffic at the internet edge (transit providers and the exchange) and towards customers (fibre homes behind CGNAT and the WireGuard home).
+
+
+Prefixes received by the border routers from each transit provider and from the exchange route server, and the state of every BGP session.
+
+
 ## Topology
 
 ```mermaid

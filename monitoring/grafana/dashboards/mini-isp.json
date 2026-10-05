@@ -543,27 +543,39 @@
     }
    ],
    "fieldConfig": {
-    "defaults": {
-     "thresholds": {
-      "mode": "absolute",
-      "steps": [
+    "defaults": {},
+    "overrides": [
+     {
+      "matcher": {
+       "id": "byName",
+       "options": "Value"
+      },
+      "properties": [
        {
-        "color": "red",
-        "value": null
+        "id": "custom.cellOptions",
+        "value": {
+         "type": "color-background"
+        }
        },
        {
-        "color": "green",
-        "value": 1
+        "id": "thresholds",
+        "value": {
+         "mode": "absolute",
+         "steps": [
+          {
+           "color": "red",
+           "value": null
+          },
+          {
+           "color": "green",
+           "value": 1
+          }
+         ]
+        }
        }
       ]
-     },
-     "custom": {
-      "cellOptions": {
-       "type": "color-background"
-      }
      }
-    },
-    "overrides": []
+    ]
    },
    "id": 11,
    "datasource": {
