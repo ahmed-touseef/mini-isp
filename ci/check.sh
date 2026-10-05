@@ -25,6 +25,7 @@ python3 netbox/render.py --snapshot netbox/snapshot.json > /dev/null
 if git diff --quiet -- generated/; then ok "generated/ is up to date"; else bad "generated/ differs, re-render and commit"; git --no-pager diff --stat -- generated/; fi
 
 echo "== FRR syntax check (vtysh dry run in the official FRR image) =="
+$DOCKER pull -q "$IMG" > /dev/null || bad "could not pull $IMG"
 for f in generated/*.conf configs/arelion.conf configs/cogent.conf configs/internet.conf configs/fastweb.conf configs/netflix.conf configs/rs.conf; do
   out=$($DOCKER run --rm -v "$PWD/$f:/tmp/c.conf:ro" -v "$PWD/configs/vtysh.conf:/etc/frr/vtysh.conf:ro" "$IMG" vtysh -C -f /tmp/c.conf 2>&1)
   rc=$?
